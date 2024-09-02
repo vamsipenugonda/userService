@@ -16,7 +16,7 @@ public class Session extends BaseModel{
     private String token;
     @ManyToOne
     private User user;
-    private Date expringAt;
+    private Date expiringAt;
     @Enumerated(EnumType.ORDINAL)
     private SessionStatus sessionStatus;
 }
