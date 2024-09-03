@@ -3,6 +3,7 @@ package com.springboot.userservice.services;
 import com.springboot.userservice.exceptions.UserAlreadyExistsException;
 import com.springboot.userservice.exceptions.UserNotFoundException;
 import com.springboot.userservice.exceptions.WrongPasswordException;
+import com.springboot.userservice.models.Role;
 import com.springboot.userservice.models.Session;
 import com.springboot.userservice.models.User;
 import com.springboot.userservice.repositories.SessionRepository;
@@ -11,7 +12,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -57,7 +57,7 @@ public class AuthService {
 
         if (matches) {
             String token =  createJwtToken(userOptional.get().getId(),
-                    new ArrayList<>(),
+                    userOptional.get().getRoles(),
                     userOptional.get().getEmail());
 
             Session session = new Session();
@@ -65,14 +65,12 @@ public class AuthService {
             session.setUser(userOptional.get());
 
             Calendar calendar = Calendar.getInstance();
-            Date currentDate = calendar.getTime();
+           // Date currentDate = calendar.getTime();
 
             calendar.add(Calendar.DAY_OF_MONTH, 30);
             Date datePlus30Days = calendar.getTime();
             session.setExpiringAt(datePlus30Days);
-
             sessionRepository.save(session);
-
             return token;
         } else {
             throw new WrongPasswordException("Wrong password.");
@@ -96,7 +94,7 @@ public class AuthService {
         return true;
     }
 
-    private String createJwtToken(Long userId, List<String> roles, String email) {
+    private String createJwtToken(Long userId, Set<Role> roles, String email) {
         Map<String, Object> dataInJwt = new HashMap<>();
         dataInJwt.put("user_id", userId);
         dataInJwt.put("roles", roles);
